@@ -421,8 +421,7 @@ const resolvers = {
             const token = jwt.sign({ id: clienteId }, process.env.JWT_CONFIRM_SECRET, { expiresIn: '1d' });
 
 // 3. Construir URL de confirmación
-            const urlConfirmacion = `http://localhost:5173/confirmar/${token}`;
-
+            const urlConfirmacion = `${process.env.FRONTEND_URL || "http://localhost:5173"}/confirmar/${token}`;
 // 4. Enviar email
             await send(
                 process.env.SERVICE_ID,
@@ -457,7 +456,7 @@ const resolvers = {
             existeCliente.telefono = telefono;
             await existeCliente.save();
 
-            const urlInicio = 'http://localhost:5173/login'
+            const urlInicio = `${process.env.FRONTEND_URL || "http://localhost:5173"}/login`
 
             await send(
                 process.env.SERVICE_ID,
@@ -554,8 +553,7 @@ const resolvers = {
 
             const token = jwt.sign({ id: clienteId }, process.env.JWT_CONFIRM_SECRET, { expiresIn: '1d' });
 
-            const urlConfirmacion = `http://localhost:5173/reset/${token}`;
-
+            const urlConfirmacion = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset/${token}`;
             await send(
                 process.env.SERVICE_ID,
                 process.env.TEMPLATE_ID,

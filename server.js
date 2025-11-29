@@ -7,8 +7,6 @@ import resolvers from './resolvers/resolver.js'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import cors from 'cors';
 import conectarDB from './config/db.js';
-import { Cliente } from "./models/Model.js";
-
 import multer from "multer";
 import path from "path";
 import fs from "fs";
