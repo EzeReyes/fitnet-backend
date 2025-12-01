@@ -85,7 +85,8 @@ const resolvers = {
                 console.log(clienteEncontrado)
                 return { autenticado: true, usuario: clienteEncontrado };
 
-            } catch {
+            } catch(error) {
+                console.log(error)
                 return { autenticado: false, usuario: null };
             }
         },
@@ -498,43 +499,48 @@ const resolvers = {
         }
         },
         login: async (_, { email, contrasena }, { res }) => {
-                        if (!email || !contrasena) {
-                            throw new Error('Todos los campos son obligatorios');
-                        }
-            
-                        const cliente = await Cliente.findOne({ email });
-            
-                        if (!cliente) {
-                            throw new Error('Credenciales incorrectas');
-                        }
-            
-                        const passwordValida = await bcrypt.compare(contrasena, cliente.contrasena);
-                        if (!passwordValida) {
-                            throw new Error('Credenciales incorrectas');
-                        }
+        if (!email || !contrasena) {
+            throw new Error('Todos los campos son obligatorios');
+        }
 
-            const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '20m' });
-            
-            res.setHeader('Set-Cookie', cookie.serialize('authToken', token, {
+        const cliente = await Cliente.findOne({ email: email.toLowerCase() });
+        if (!cliente) {
+            throw new Error('Credenciales incorrectas');
+        }
+
+        const passwordValida = await bcrypt.compare(contrasena, cliente.contrasena);
+        if (!passwordValida) {
+            throw new Error('Credenciales incorrectas');
+        }
+
+        const token = jwt.sign(
+            { id: cliente._id, email: cliente.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '20m' }
+        );
+
+        res.setHeader('Set-Cookie', cookie.serialize('authToken', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 1800,
-            sameSite: 'lax',
-            path: '/'
+            sameSite: 'Strict',
+            path: '/',
+            domain: 'fitnet-frontend.vercel.app'
         }));
 
         return {
-        mensaje: 'Sesión iniciada',
-        token
+            mensaje: 'Sesión iniciada',
+            token
         };
         },
         logout: (_, __, { res }) => {
         res.setHeader('Set-Cookie', cookie.serialize('authToken', '', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 0,
-            sameSite: 'lax',
-            path: '/'
+            maxAge: 0, // expira inmediatamente
+            sameSite: 'Strict',
+            path: '/',
+            domain: 'fitnet-frontend.vercel.app' // opcional, si quieres restringir al dominio
         }));
 
         return 'Sesión cerrada';
