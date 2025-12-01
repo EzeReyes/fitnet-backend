@@ -523,7 +523,7 @@ const resolvers = {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 1800,
-            sameSite: 'Strict',
+            sameSite: 'None',
             path: '/',
             domain: 'fitnet-frontend.vercel.app'
         }));
@@ -538,7 +538,7 @@ const resolvers = {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: 0, // expira inmediatamente
-            sameSite: 'Strict',
+            sameSite: 'None',
             path: '/',
             domain: 'fitnet-frontend.vercel.app' // opcional, si quieres restringir al dominio
         }));
