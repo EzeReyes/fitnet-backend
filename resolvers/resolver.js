@@ -521,7 +521,8 @@ const resolvers = {
 
         res.setHeader('Set-Cookie', cookie.serialize('authToken', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            // secure: process.env.NODE_ENV === 'production',
+            secure: true,
             maxAge: 1800,
             sameSite: 'None',
             path: '/',
@@ -536,7 +537,8 @@ const resolvers = {
         logout: (_, __, { res }) => {
         res.setHeader('Set-Cookie', cookie.serialize('authToken', '', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            // secure: process.env.NODE_ENV === 'production',
+            secure: true,
             maxAge: 0, // expira inmediatamente
             sameSite: 'None',
             path: '/',
