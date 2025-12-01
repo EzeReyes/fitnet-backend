@@ -526,7 +526,7 @@ const resolvers = {
             maxAge: 1800,
             sameSite: 'None',
             path: '/',
-            domain: 'fitnet-frontend.vercel.app'
+            domain: 'fitnet-backend.onrender.com'
         }));
 
         return {
@@ -542,7 +542,7 @@ const resolvers = {
             maxAge: 0, // expira inmediatamente
             sameSite: 'None',
             path: '/',
-            domain: 'fitnet-frontend.vercel.app' // opcional, si quieres restringir al dominio
+            domain: 'fitnet-backend.onrender.com'
         }));
 
         return 'Sesión cerrada';
