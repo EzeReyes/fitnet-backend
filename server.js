@@ -65,6 +65,32 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
     const uploadPath = path.join(__dirname, "uploads/avatars");
 
 
+app.post("/process_payment", async (req, res) => {
+  console.log(req)
+  try {
+    const { items, payer } = req.body;
+
+    const result = await preference.create({
+      body: {
+        items:items,
+        payer:payer,
+        back_urls: {
+          success: "https://www.youtube.com/",
+          failure: "https://www.youtube.com/",
+          pending: "https://www.youtube.com/",
+        },
+        auto_return: "approved",
+        notification_url: "https://fitnet-backend.onrender.com/webhook"      
+      },
+    });
+
+    res.json(result); // devuelve la preferencia creada
+  } catch (error) {
+    console.error("Error al crear preferencia:", error);
+    res.status(500).json({ error: "Error al procesar pago" });
+  }
+});
+
 app.post("/webhook", async (req, res) => {
   try {
     console.log("WEBHOOK RECIBIDO:", req.body);
@@ -119,68 +145,6 @@ app.post("/webhook", async (req, res) => {
     });
 
     // Actualizar DB aquí
-
-    return res.sendStatus(200);
-  } catch (error) {
-    console.error("❌ ERROR WEBHOOK:", error);
-    return res.sendStatus(200);
-  }
-});
-
-app.post("/webhook", async (req, res) => {
-  try {
-    console.log("WEBHOOK RECIBIDO:", req.body);
-
-    const body = req.body || {};
-
-    // MP puede mandar {resource, topic} o {type, action, data}
-    const topic = body.topic;
-    const resource = body.resource;
-    const type = body.type;
-    const data = body.data;
-
-    // Si no hay nada relevante → responder 200
-    if (!topic && !type) {
-      console.log("⚠️ Webhook vacío recibido");
-      return res.sendStatus(200);
-    }
-
-    // Validar que sea un webhook de pago
-    if ((topic !== "payment") && (type !== "payment")) {
-      console.log("⚠️ Webhook ignorado (no es payment)");
-      return res.sendStatus(200);
-    }
-
-    // Obtener el ID de pago
-    const paymentId = data?.id || resource;
-    console.log("🔵 ID DE PAGO RECIBIDO:", paymentId);
-
-    if (!paymentId) {
-      console.log("⚠️ No se encontró ID de pago");
-      return res.sendStatus(200);
-    }
-
-    // Consultar el pago real
-    const pago = await payment.get({ id: paymentId });
-    const info = pago.response;
-
-    const status = info.status;
-    const method = info.payment_method_id;
-    const amount = info.transaction_amount;
-    const email = info.payer.email;
-    const externalReference = info.external_reference;
-    const date = info.date_approved;
-
-    console.log("📌 DATOS A GUARDAR:", {
-      status,
-      amount,
-      email,
-      method,
-      externalReference,
-      date
-    });
-
-    // Actualizar tu DB aquí
 
     return res.sendStatus(200);
   } catch (error) {
