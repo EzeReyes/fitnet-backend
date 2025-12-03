@@ -68,7 +68,7 @@ const ClienteSchema = new Schema({
   socialMedia: [ImagenSchema],
   rutina: [{ type: Schema.Types.ObjectId, ref: 'Rutina' }],
   fechaHabilitacion: { type: Date },
-  pagos: [{ type: Schema.Types.ObjectId, ref: 'PagoMensualidad' }],
+  pagos: [{ type: Schema.Types.ObjectId, ref: 'Pago' }],
   gruposMuscularesRealizados: [GrupoMuscularRealizadoSchema],
   confirmado: {
         type: Boolean,

@@ -27,7 +27,7 @@ const typeDefs = gql`
         socialMedia: [Imagen!]!
         rutina: [Rutina]
         fechaHabilitacion: String
-        pagoMensualidad: PagoMensualidad
+        pagos: [ID!]!
         gruposMuscularesRealizados: [GrupoMuscularRealizado]
         confirmado: Boolean
         avatar: String
