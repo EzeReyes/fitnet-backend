@@ -19,7 +19,7 @@ const client = new MercadoPagoConfig({ accessToken:process.env.MP_ACCESS_TOKEN})
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const preference = new Preference(client);
-
+const payment = new Payment(client);
 
 conectarDB();
 
@@ -116,7 +116,7 @@ app.post("/webhook", async (req, res) => {
     console.log("🔵 ID DE PAGO RECIBIDO:", paymentId);
 
     // Obtener el pago real desde Mercado Pago (SDK v2)
-    const pago = await mp.payment.get({ id: paymentId });
+    const pago = await payment.get({ id: paymentId });
 
     console.log("💰 PAGO OBTENIDO:", pago);
 
