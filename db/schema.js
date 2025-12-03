@@ -178,7 +178,6 @@ const typeDefs = gql`
         editarSerie(id: ID!, serieId:ID!, input: SerieInput): Serie
         crearEjercicio(input: EjercicioInput): Ejercicio
         editarEjercicio(id: ID!, nombre: String!, descripcion: String!, ejecucion: String!): Ejercicio 
-        crearPagoMensualidad(input: PagoInput): PagoMensualidad
         crearGrupoMuscular(nombre: String!, descripcion: String, ejercicios: [ID!]): GrupoMuscular
         crearGrupoMuscularRealizado(grupoMuscular: ID!, fechaRealizacion: String!, ejerciciosCompletados: [ID!]!): GrupoMuscularRealizado
         crearCliente(input: ClienteInput): ID

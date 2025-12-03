@@ -354,11 +354,6 @@ const resolvers = {
             await ejercicioExiste.save();
             return ejercicioExiste;
         },
-        crearPagoMensualidad: async (_, {input}) => {
-            const nuevoPago = await new PagoMensualidad(input);
-            nuevoPago.save();
-            return nuevoPago;
-        },
         crearGrupoMuscular: async (_, { nombre, descripcion, ejercicios }) => {
         if (!nombre) throw new Error('El nombre es obligatorio');
 
