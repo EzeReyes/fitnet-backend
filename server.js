@@ -11,21 +11,56 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from 'url';
-// SDK de Mercado Pago
+
+// SDK Mercado Pago v2
 import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
-// Agrega credenciales
-const client = new MercadoPagoConfig({ accessToken:process.env.MP_ACCESS_TOKEN});
-// __dirname fix for ES Modules
+
+// Agregar credenciales
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN
+});
+
+const preference = new Preference(client);
+const payment = new Payment(client);
+
+// __dirname fix
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const preference = new Preference(client);
-
 
 conectarDB();
 
 const app = express();
 
-// Multer storage
+// ========= WEBHOOK MERCADO PAGO =========
+app.post('/webhook', express.json(), async (req, res) => {
+  try {
+    console.log("WEBHOOK:", req.body);
+
+    const { data } = req.body;
+
+    if (!data?.id) {
+      console.log("Notificación sin ID de pago");
+      return res.sendStatus(200);
+    }
+
+    const paymentId = data.id;
+
+    // ✔️ Consultar el pago REAL con el SDK correcto
+    const pagoReal = await payment.get({ id: paymentId });
+
+    console.log("PAGO REAL:", pagoReal);
+
+    // Acá procesás tu orden…
+
+    return res.sendStatus(200);
+
+  } catch (error) {
+    console.error("ERROR WEBHOOK:", error);
+    return res.sendStatus(500);
+  }
+});
+
+// ========= MULTER =========
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, "/uploads/avatars");
@@ -40,39 +75,9 @@ const storage = multer.diskStorage({
   }
 });
 
-const payment = new Payment(client);
-
-app.post('/webhook', express.json(), async (req, res) => {
-  try {
-    console.log("WEBHOOK:", req.body);
-
-    const { type, action, data } = req.body;
-
-    if (!data || !data.id) {
-      console.log("Notificación sin ID");
-      return res.sendStatus(200); 
-    }
-
-    // ✨ Consulta a Mercado Pago el pago real
-    const paymentId = data.id;
-
-    const payment = await mp.payment.get(paymentId);
-
-    console.log("PAGO REAL:", payment);
-
-    // ✨ Procesá tu lógica...
-    // guardar en DB, actualizar orden, etc.
-
-    return res.sendStatus(200);
-  } catch (error) {
-    console.error("ERROR WEBHOOK:", error);
-    return res.sendStatus(500);
-  }
-});
-
-
 const upload = multer({ storage });
 
+// ========= HTTP SERVER =========
 const httpServer = http.createServer(app);
 
 const server = new ApolloServer({
@@ -90,41 +95,40 @@ app.use(cors({
   credentials: true
 }));
 
-// Servir carpeta uploads
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-    const uploadPath = path.join(__dirname, "uploads/avatars");
-
-
+// ========= PREFERENCIAS MERCADO PAGO =========
 app.post("/process_payment", async (req, res) => {
-  console.log(req)
   try {
     const { items, payer } = req.body;
 
     const result = await preference.create({
       body: {
-        items:items,
-        payer:payer,
+        items,
+        payer,
         back_urls: {
           success: "https://www.youtube.com/",
           failure: "https://www.youtube.com/",
           pending: "https://www.youtube.com/",
         },
+        notification_url: `${process.env.BACKEND_URL}/webhook`, // ✔️ Asegurar webhook
         auto_return: "approved",
       },
     });
 
-    res.json(result); // devuelve la preferencia creada
+    res.json(result);
   } catch (error) {
     console.error("Error al crear preferencia:", error);
     res.status(500).json({ error: "Error al procesar pago" });
   }
 });
 
+// ========= GRAPHQL =========
 app.use('/graphql', expressMiddleware(server, {
   context: async ({ req, res }) => ({ req, res })
 }));
 
+// ========= START SERVER =========
 const port = process.env.PORT || 4000;
 httpServer.listen(port, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${port}/graphql`);
