@@ -96,46 +96,43 @@ app.post("/webhook", async (req, res) => {
 
     const body = req.body || {};
 
+    // MP puede mandar {resource, topic} o {type, action, data}
+    const topic = body.topic;
+    const resource = body.resource;
     const type = body.type;
-    const action = body.action;
     const data = body.data;
 
-    // Si no hay nada, MP a veces envía webhooks vacíos → responder 200
-    if (!type && !action && !data) {
+    // Si no hay nada relevante → responder 200
+    if (!topic && !type) {
       console.log("⚠️ Webhook vacío recibido");
       return res.sendStatus(200);
     }
 
     // Validar que sea un webhook de pago
-    if (type !== "payment" || !data?.id) {
+    if ((topic !== "payment") && (type !== "payment")) {
       console.log("⚠️ Webhook ignorado (no es payment)");
       return res.sendStatus(200);
     }
 
-    const paymentId = data.id;
+    // Obtener el ID de pago
+    const paymentId = data?.id || resource;
     console.log("🔵 ID DE PAGO RECIBIDO:", paymentId);
 
-    // Obtener el pago real desde Mercado Pago (SDK v2)
+    if (!paymentId) {
+      console.log("⚠️ No se encontró ID de pago");
+      return res.sendStatus(200);
+    }
+
+    // Consultar el pago real
     const pago = await payment.get({ id: paymentId });
-
-    console.log("💰 PAGO OBTENIDO:", pago);
-
-    // Extraer datos importantes
     const info = pago.response;
 
-    const status = info.status;                   // approved, rejected, pending
-    const method = info.payment_method_id;        // visa, mastercard, account_money, etc
+    const status = info.status;
+    const method = info.payment_method_id;
     const amount = info.transaction_amount;
     const email = info.payer.email;
-    const externalReference = info.external_reference; // útil para mapear con tu DB
+    const externalReference = info.external_reference;
     const date = info.date_approved;
-
-    // Aquí actualizas tu base de datos
-    // Ejemplo:
-    // await Orden.findOneAndUpdate(
-    //   { preferenceId: externalReference },
-    //   { estado: status, fechaPago: date }
-    // );
 
     console.log("📌 DATOS A GUARDAR:", {
       status,
@@ -146,10 +143,12 @@ app.post("/webhook", async (req, res) => {
       date
     });
 
-    return res.sendStatus(200); // SIEMPRE responder 200
+    // Actualizar tu DB aquí
+
+    return res.sendStatus(200);
   } catch (error) {
     console.error("❌ ERROR WEBHOOK:", error);
-    return res.sendStatus(200); // Mercado Pago debe recibir siempre 200
+    return res.sendStatus(200);
   }
 });
 
