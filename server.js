@@ -12,7 +12,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from 'url';
 // SDK de Mercado Pago
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 // Agrega credenciales
 const client = new MercadoPagoConfig({ accessToken:process.env.MP_ACCESS_TOKEN});
 // __dirname fix for ES Modules
@@ -39,6 +39,8 @@ const storage = multer.diskStorage({
     cb(null, unique);
   }
 });
+
+const payment = new Payment(client);
 
 app.post('/webhook', express.json(), async (req, res) => {
   try {
