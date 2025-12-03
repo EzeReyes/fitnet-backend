@@ -521,12 +521,13 @@ const resolvers = {
 
         res.setHeader('Set-Cookie', cookie.serialize('authToken', token, {
             httpOnly: true,
-            // secure: process.env.NODE_ENV === 'production',
-            secure: true,
-            maxAge: 1800,
-            sameSite: 'None',
+            secure: process.env.NODE_ENV === 'production',
+            // secure: true,
+            maxAge: 1800, // expira inmediatamente
+            // sameSite: 'None',
+            sameSite: 'Lax',
             path: '/',
-            domain: 'fitnet-backend.onrender.com'
+            // domain: 'fitnet-backend.onrender.com'
         }));
 
         return {
@@ -537,12 +538,13 @@ const resolvers = {
         logout: (_, __, { res }) => {
         res.setHeader('Set-Cookie', cookie.serialize('authToken', '', {
             httpOnly: true,
-            // secure: process.env.NODE_ENV === 'production',
-            secure: true,
+            secure: process.env.NODE_ENV === 'production',
+            // secure: true,
             maxAge: 0, // expira inmediatamente
-            sameSite: 'None',
+            // sameSite: 'None',
+            sameSite: 'Lax',
             path: '/',
-            domain: 'fitnet-backend.onrender.com'
+            // domain: 'fitnet-backend.onrender.com'
         }));
 
         return 'Sesión cerrada';

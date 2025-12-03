@@ -40,6 +40,35 @@ const storage = multer.diskStorage({
   }
 });
 
+app.post('/webhook', express.json(), async (req, res) => {
+  try {
+    console.log("WEBHOOK:", req.body);
+
+    const { type, action, data } = req.body;
+
+    if (!data || !data.id) {
+      console.log("Notificación sin ID");
+      return res.sendStatus(200); 
+    }
+
+    // ✨ Consulta a Mercado Pago el pago real
+    const paymentId = data.id;
+
+    const payment = await mp.payment.get(paymentId);
+
+    console.log("PAGO REAL:", payment);
+
+    // ✨ Procesá tu lógica...
+    // guardar en DB, actualizar orden, etc.
+
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error("ERROR WEBHOOK:", error);
+    return res.sendStatus(500);
+  }
+});
+
+
 const upload = multer({ storage });
 
 const httpServer = http.createServer(app);
