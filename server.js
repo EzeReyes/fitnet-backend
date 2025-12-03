@@ -80,7 +80,8 @@ app.post("/process_payment", async (req, res) => {
           pending: "https://www.youtube.com/",
         },
         auto_return: "approved",
-        notification_url: "https://tuservidor.com/mp-webhook"      },
+        notification_url: "https://fitnet-backend.onrender.com/webhook"      
+      },
     });
 
     res.json(result); // devuelve la preferencia creada
