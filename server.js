@@ -12,7 +12,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from 'url';
 // SDK de Mercado Pago
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 // Agrega credenciales
 const client = new MercadoPagoConfig({ accessToken:process.env.MP_ACCESS_TOKEN});
 // __dirname fix for ES Modules
@@ -80,13 +80,37 @@ app.post("/process_payment", async (req, res) => {
           pending: "https://www.youtube.com/",
         },
         auto_return: "approved",
-      },
+        notification_url: "https://tuservidor.com/mp-webhook"      },
     });
 
     res.json(result); // devuelve la preferencia creada
   } catch (error) {
     console.error("Error al crear preferencia:", error);
     res.status(500).json({ error: "Error al procesar pago" });
+  }
+});
+
+app.post("/webhook", async (req, res) => {
+  try {
+    const { action, type, data } = req.body;
+
+    console.log("WEBHOOK RECIBIDO:", req.body);
+
+    // Si el ID es muy chico o es prueba, simplemente responder 200
+    if (String(data.id).length < 8) {
+      console.log("Webhook de prueba recibido, ignorando.");
+      return res.sendStatus(200);
+    }
+
+    // Obtener el pago real
+    const pago = await payment.get(data.id);
+
+    console.log("PAGO REAL:", pago);
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("ERROR WEBHOOK:", error);
+    res.sendStatus(200); // Siempre responder 200 a Mercado Pago
   }
 });
 
