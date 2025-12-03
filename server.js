@@ -92,27 +92,67 @@ app.post("/process_payment", async (req, res) => {
 
 app.post("/webhook", async (req, res) => {
   try {
-    const { action, type, data } = req.body;
-
     console.log("WEBHOOK RECIBIDO:", req.body);
 
-    // Si el ID es muy chico o es prueba, simplemente responder 200
-    if (String(data.id).length < 8) {
-      console.log("Webhook de prueba recibido, ignorando.");
+    const body = req.body || {};
+
+    const type = body.type;
+    const action = body.action;
+    const data = body.data;
+
+    // Si no hay nada, MP a veces envía webhooks vacíos → responder 200
+    if (!type && !action && !data) {
+      console.log("⚠️ Webhook vacío recibido");
       return res.sendStatus(200);
     }
 
-    // Obtener el pago real
-    const pago = await payment.get(data.id);
+    // Validar que sea un webhook de pago
+    if (type !== "payment" || !data?.id) {
+      console.log("⚠️ Webhook ignorado (no es payment)");
+      return res.sendStatus(200);
+    }
 
-    console.log("PAGO REAL:", pago);
+    const paymentId = data.id;
+    console.log("🔵 ID DE PAGO RECIBIDO:", paymentId);
 
-    res.sendStatus(200);
+    // Obtener el pago real desde Mercado Pago (SDK v2)
+    const pago = await mp.payment.get({ id: paymentId });
+
+    console.log("💰 PAGO OBTENIDO:", pago);
+
+    // Extraer datos importantes
+    const info = pago.response;
+
+    const status = info.status;                   // approved, rejected, pending
+    const method = info.payment_method_id;        // visa, mastercard, account_money, etc
+    const amount = info.transaction_amount;
+    const email = info.payer.email;
+    const externalReference = info.external_reference; // útil para mapear con tu DB
+    const date = info.date_approved;
+
+    // Aquí actualizas tu base de datos
+    // Ejemplo:
+    // await Orden.findOneAndUpdate(
+    //   { preferenceId: externalReference },
+    //   { estado: status, fechaPago: date }
+    // );
+
+    console.log("📌 DATOS A GUARDAR:", {
+      status,
+      amount,
+      email,
+      method,
+      externalReference,
+      date
+    });
+
+    return res.sendStatus(200); // SIEMPRE responder 200
   } catch (error) {
-    console.error("ERROR WEBHOOK:", error);
-    res.sendStatus(200); // Siempre responder 200 a Mercado Pago
+    console.error("❌ ERROR WEBHOOK:", error);
+    return res.sendStatus(200); // Mercado Pago debe recibir siempre 200
   }
 });
+
 
 app.use('/graphql', expressMiddleware(server, {
   context: async ({ req, res }) => ({ req, res })
