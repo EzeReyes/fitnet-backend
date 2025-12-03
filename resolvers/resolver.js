@@ -1,4 +1,4 @@
-import { Cliente, Serie, Rutina, Ejercicio, GrupoMuscular, PagoMensualidad, GrupoMRealizado  } from '../models/Model.js';
+import { Cliente, Serie, Rutina, Ejercicio, GrupoMuscular, Pago, GrupoMRealizado  } from '../models/Model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import cookie from 'cookie';
@@ -648,6 +648,29 @@ const resolvers = {
             } catch(error) {
                 throw new Error(error)
             }
+        },
+        crearPago: async (_, {input}) => {
+        try {
+            const { metodoPago, fecha, monto, estado, clienteId} = input;
+            if(!clienteId) {
+                throw new Error('Este ni cliente no existe');
+            }
+            console.log(estado);
+
+            const nuevoPago = await new Pago({
+                clienteId: clienteId,
+                estado: estado,
+                monto: monto,
+                fecha: fecha,
+                metodoPago: metodoPago,
+            });
+            await nuevoPago.save();
+            return nuevoPago;
+
+        } catch(error) {
+            return(error.message);
+        }
+
         }
     }
 }

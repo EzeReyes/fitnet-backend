@@ -57,20 +57,20 @@ const typeDefs = gql`
         fecha: String
     }
 
-    type PagoMensualidad {
+    type Pago {
         id: ID!
-        fechaPago: String!
-        monto: Float
-        metodo: String
-        estado: String # ej: "Pagado", "Pendiente", "Vencido"
+        metodoPago: String!
+        fecha: String!
+        monto: Float!
+        estado: String! # ej: "Pagado", "Pendiente", "Vencido"
         clienteId: ID!
     }
 
     input PagoInput {
-        fechaPago: String!
-        monto: Float
-        metodo: String
-        estado: String # ej: "Pagado", "Pendiente", "Vencido"
+        metodoPago: String!
+        fecha: String!
+        monto: Float!
+        estado: String! # ej: "Pagado", "Pendiente", "Vencido"
         clienteId: ID!
     }
 
@@ -162,7 +162,9 @@ const typeDefs = gql`
         obtenerGruposMusculares: [GrupoMuscular]
         obtenerGrupoMuscular(id: ID!): GrupoMuscular
         obtenerEjercicio(id: ID!): Ejercicio
-        verificarSesion: Sesion!        
+        verificarSesion: Sesion!       
+        mostrarPagos: [Pago!]!
+        mostrarPago(id: ID!): Pago! 
     }
 
     type Mutation {
@@ -188,6 +190,7 @@ const typeDefs = gql`
         cambioPass(token: String, contrasena: String): ConfirmResponse
         uploadAvatar(file: Upload!, user: ID!): Cliente
         modificarAjuste(clienteId: ID, idioma: String, tema: String): String
+        crearPago(input: PagoInput!): Pago
     }
 `
 export default typeDefs;

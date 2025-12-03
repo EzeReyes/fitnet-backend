@@ -5,6 +5,7 @@ import http from 'http'
 import typeDefs from './db/schema.js';
 import resolvers from './resolvers/resolver.js'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { Pago } from './models/Model.js';
 import cors from 'cors';
 import conectarDB from './config/db.js';
 import multer from "multer";
@@ -68,12 +69,23 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.post("/process_payment", async (req, res) => {
   console.log(req)
   try {
-    const { items, payer } = req.body;
+    const { items, payer, clienteId } = req.body;
+
+    // 1. Crear registro en DB
+    const nuevoPago = await Pago.create({
+      estado: "pending",
+      amount: items[0].unit_price,
+      email: payer.email,
+      clienteId: clienteId,
+      metodoPago: "mercado_pago"
+    });
+
 
     const result = await preference.create({
       body: {
         items:items,
         payer:payer,
+        external_reference: nuevoPago._id.toString(),
         back_urls: {
           success: "https://www.youtube.com/",
           failure: "https://www.youtube.com/",
@@ -134,6 +146,14 @@ app.post("/webhook", async (req, res) => {
     const email = info.payer?.email;
     const externalReference = info.external_reference;
     const date = info.date_approved;
+
+    await Pago.findByIdAndUpdate(externalReference, {
+      estado: status,
+      metodoPago: method,
+      fecha: date,
+      paymentId: paymentId
+    });
+
 
     console.log("📌 DATOS A GUARDAR:", {
       status,

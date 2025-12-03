@@ -52,15 +52,6 @@ const GrupoMuscularRealizadoSchema = new Schema({
   ejerciciosCompletados: [{ type: Schema.Types.ObjectId, ref: 'Ejercicio' }]
 });
 
-// Pago mensual
-const PagoMensualidadSchema = new Schema({
-  clienteId: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
-  fechaPago: { type: Date, required: true },
-  monto: { type: Number },
-  metodo: { type: String },
-  estado: { type: String } // Ej: "Pagado", "Pendiente", "Vencido"
-});
-
 // Cliente principal
 const ClienteSchema = new Schema({
   nombre: { type: String, required: true },
@@ -90,10 +81,22 @@ const ClienteSchema = new Schema({
   tema: { type: String, default: 'oscuro'}
 });
 
+const PagoSchema = new Schema({
+  metodoPago: { type: String, required: true},
+  monto: { type: Number, required: true },
+  estado: {type: String, required: true},
+  clienteId: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
+  method: String,
+  externalReference: String,
+  fecha: Date,
+  paymentId: String,
+}, { timestamps: true });
+
+
 export const Cliente = model('Cliente', ClienteSchema);
 export const Rutina = model('Rutina', RutinaSchema);
 export const GrupoMuscular = model('GrupoMuscular', GrupoMuscularSchema);
 export const Ejercicio = model('Ejercicio', EjercicioSchema);
-export const PagoMensualidad = model('PagoMensualidad', PagoMensualidadSchema);
 export const Serie = model('Serie', SerieSchema);
 export const GrupoMRealizado = model('GrupoMuscularRealizado', GrupoMuscularRealizadoSchema);
+export const Pago = model('Pago', PagoSchema);
