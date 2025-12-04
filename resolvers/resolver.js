@@ -113,8 +113,20 @@ const resolvers = {
                 throw new Error('No se encontraron rutinas');
             }
             return rutinas;
+        },
+        obtenerPagos: async () => {
+        try{    
+            const pagos = await Pago.find()
+                .populate("clienteId");
+            if(!pagos) {
+                throw new Error('No hay pagos realizados');
+            }
+            return pagos;
+        } catch(error) {
+            throw new Error(error)
         }
         },
+    },
     Mutation: {
         crearRutina: async (_, { input }) => {
             try {

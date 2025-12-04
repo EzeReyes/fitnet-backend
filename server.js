@@ -21,6 +21,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const preference = new Preference(client);
 const payment = new Payment(client);
+import dayjs from "dayjs";
+
 
 conectarDB();
 

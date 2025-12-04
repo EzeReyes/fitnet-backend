@@ -11,6 +11,12 @@ const typeDefs = gql`
         NIVEL_3
     }
 
+    enum Membresia {
+        BASICA
+        DIARIA
+        PREMIUM
+    }
+
     type Cliente {
         id: ID!
         nombre: String!
@@ -63,7 +69,7 @@ const typeDefs = gql`
         fecha: String!
         monto: Float!
         estado: String! # ej: "Pagado", "Pendiente", "Vencido"
-        clienteId: ID!
+        clienteId: [Cliente!]
     }
 
     input PagoInput {
@@ -163,7 +169,7 @@ const typeDefs = gql`
         obtenerGrupoMuscular(id: ID!): GrupoMuscular
         obtenerEjercicio(id: ID!): Ejercicio
         verificarSesion: Sesion!       
-        mostrarPagos: [Pago!]!
+        obtenerPagos: [Pago!]!
         mostrarPago(id: ID!): Pago! 
     }
 
