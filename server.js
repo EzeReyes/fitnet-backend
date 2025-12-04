@@ -74,7 +74,7 @@ app.post("/process_payment", async (req, res) => {
     // 1. Crear registro en DB
     const nuevoPago = await Pago.create({
       estado: "pending",
-      amount: items[0].unit_price,
+      monto: items[0].unit_price,
       email: payer.email,
       clienteId: clienteId,
       metodoPago: "mercado_pago"
