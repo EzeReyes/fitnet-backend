@@ -85,7 +85,7 @@ const PagoSchema = new Schema({
   metodoPago: { type: String, required: true},
   monto: { type: Number, required: true },
   estado: {type: String, required: true},
-  clienteId: { type: Schema.Types.ObjectId, ref: 'Cliente', required: true },
+  clienteId: [{ type: Schema.Types.ObjectId, ref: 'Cliente', required: true }],
   method: String,
   externalReference: String,
   fecha: Date,
