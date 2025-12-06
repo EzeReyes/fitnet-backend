@@ -11,7 +11,8 @@ const resolvers = {
     Query: {
         obtenerClientes: async () => {
             const clientes = await Cliente.find({})
-                .populate('rutina');
+                .populate('rutina')
+                .populate('pagos');
             return clientes;
         },
         obtenerCliente: async (_, {email, contrasena}) => {
@@ -32,7 +33,8 @@ const resolvers = {
         },
         obtenerClientePorId: async (_, {id}) => {
             const cliente = await Cliente.findById(id)
-                .populate('rutina');
+                .populate('rutina')
+                .populate('pagos');
             if(!cliente) {
                 throw new Error('Ese cliente no existe!');
             }
@@ -656,29 +658,40 @@ const resolvers = {
                 throw new Error(error)
             }
         },
-        crearPago: async (_, {input}) => {
-        try {
-            const { metodoPago, fecha, monto, estado, clienteId} = input;
-            if(!clienteId) {
-                throw new Error('Este ni cliente no existe');
+        crearPago: async (_, { input }) => {
+            try {
+                const { metodoPago, fecha, monto, estado, clienteId } = input;
+
+                const existeCliente = await Cliente.findById(clienteId);
+                if (!existeCliente) {
+                throw new Error("Este cliente no existe");
+                }
+
+                // Normalizar fecha: si viene como string numérico, convertir a Date
+                const fechaNormalizada =
+                typeof fecha === "string" || typeof fecha === "number"
+                    ? new Date(Number(fecha))
+                    : fecha;
+
+                const nuevoPago = new Pago({
+                clienteId,
+                estado,
+                monto,
+                fecha: fechaNormalizada,
+                metodoPago,
+                });
+
+                await nuevoPago.save();
+
+                // Guardar Pago en cliente
+                existeCliente.pagos.push(nuevoPago.id);
+                await existeCliente.save();
+
+                return nuevoPago;
+            } catch (error) {
+                throw new Error(error.message);
             }
-            console.log(estado);
-
-            const nuevoPago = await new Pago({
-                clienteId: clienteId,
-                estado: estado,
-                monto: monto,
-                fecha: fecha,
-                metodoPago: metodoPago,
-            });
-            await nuevoPago.save();
-            return nuevoPago;
-
-        } catch(error) {
-            return(error.message);
-        }
-
-        }
+            }
     }
 }
 

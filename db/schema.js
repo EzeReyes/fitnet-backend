@@ -33,7 +33,7 @@ const typeDefs = gql`
         socialMedia: [Imagen!]!
         rutina: [Rutina]
         fechaHabilitacion: String
-        pagos: [ID!]!
+        pagos: [Pago!]!
         gruposMuscularesRealizados: [GrupoMuscularRealizado]
         confirmado: Boolean
         avatar: String
@@ -66,7 +66,7 @@ const typeDefs = gql`
     type Pago {
         id: ID!
         metodoPago: String!
-        fecha: String!
+        fecha: String
         monto: Float!
         estado: String! # ej: "Pagado", "Pendiente", "Vencido"
         clienteId: [Cliente!]
@@ -74,7 +74,7 @@ const typeDefs = gql`
 
     input PagoInput {
         metodoPago: String!
-        fecha: String!
+        fecha: String
         monto: Float!
         estado: String! # ej: "Pagado", "Pendiente", "Vencido"
         clienteId: ID!
